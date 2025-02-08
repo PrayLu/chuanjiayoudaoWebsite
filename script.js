@@ -87,19 +87,19 @@ const lazyLoadImages = () => {
 
 // 导航栏滚动效果
 const handleNavbarScroll = () => {
-  const navbar = document.querySelector('.navbar');
-  const scrollThreshold = 100;
+    const navbar = document.querySelector('.navbar');
+    const scrollThreshold = 100;
 
-  window.addEventListener('scroll', debounce(() => {
-    if (window.scrollY > scrollThreshold) {
-      navbar?.classList.add('navbar-scrolled');
-    } else {
-      navbar?.classList.remove('navbar-scrolled');
-    }
-  }, 100));
+    window.addEventListener('scroll', debounce(() => {
+        if (window.scrollY > scrollThreshold) {
+            navbar?.classList.add('navbar-scrolled');
+        } else {
+            navbar?.classList.remove('navbar-scrolled');
+        }
+    }, 100));
 };
 
-// 团队滑块控制
+// 团队滑块控制优化
 const initTeamSlider = () => {
     const slider = document.querySelector('.team-slider');
     const prevBtn = document.querySelector('.slider-arrow.prev');
@@ -107,20 +107,14 @@ const initTeamSlider = () => {
     
     if (!slider || !prevBtn || !nextBtn) return;
     
-    const slideWidth = slider.clientWidth / 2;
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-    let isAnimating = false;
+    const slideWidth = slider.clientWidth / 4; // 每次滚动一屏的1/4
+    const maxScroll = slider.scrollWidth - slider.clientWidth;
     
-    // 优化的平滑滚动函数
+    // 滚动到指定位置的函数
     const smoothScroll = (target) => {
-        if (isAnimating) return;
-        isAnimating = true;
-        
         const start = slider.scrollLeft;
         const distance = target - start;
-        const duration = 1200; // 增加动画时间
+        const duration = 500;
         let startTime = null;
         
         const animation = (currentTime) => {
@@ -128,99 +122,52 @@ const initTeamSlider = () => {
             const timeElapsed = currentTime - startTime;
             const progress = Math.min(timeElapsed / duration, 1);
             
-            // 使用更平滑的缓动函数
-            const easeOutExpo = t => (t === 1) ? 1 : 1 - Math.pow(2, -10 * t);
+            // 使用 easeInOutQuad 缓动函数
+            const easeInOutQuad = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
             
-            slider.scrollLeft = start + (distance * easeOutExpo(progress));
+            slider.scrollLeft = start + (distance * easeInOutQuad(progress));
             
             if (progress < 1) {
                 requestAnimationFrame(animation);
-            } else {
-                setTimeout(() => {
-                    isAnimating = false;
-                }, 100); // 添加小延迟，防止连续滑动太快
             }
         };
         
         requestAnimationFrame(animation);
     };
     
-    // 优化的滚动处理函数
-    const handleScroll = (direction) => {
-        const currentScroll = slider.scrollLeft;
-        const maxScroll = slider.scrollWidth - slider.clientWidth;
-        let target = currentScroll + (direction * slideWidth);
+    // 更新按钮状态
+    const updateButtons = () => {
+        prevBtn.style.opacity = slider.scrollLeft <= 0 ? '0.5' : '1';
+        prevBtn.style.cursor = slider.scrollLeft <= 0 ? 'not-allowed' : 'pointer';
         
-        // 确保不会过度滚动
-        target = Math.max(0, Math.min(target, maxScroll));
-        
-        smoothScroll(target);
+        nextBtn.style.opacity = slider.scrollLeft >= maxScroll - 1 ? '0.5' : '1';
+        nextBtn.style.cursor = slider.scrollLeft >= maxScroll - 1 ? 'not-allowed' : 'pointer';
     };
     
-    // 触控板滚动事件优化
-    let wheelTimeout;
-    let lastScrollTime = 0;
-    slider.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        
-        const now = Date.now();
-        if (now - lastScrollTime < 200) return; // 限制滚动频率
-        
-        lastScrollTime = now;
-        
-        if (wheelTimeout) clearTimeout(wheelTimeout);
-        
-        wheelTimeout = setTimeout(() => {
-            const direction = Math.sign(e.deltaX || e.deltaY);
-            handleScroll(direction);
-        }, 50);
-    }, { passive: false });
-
-    // 箭头按钮点击事件
-    prevBtn.addEventListener('click', () => handleScroll(-1));
-    nextBtn.addEventListener('click', () => handleScroll(1));
-
-    // 优化的触摸事件处理
-    let touchStartX = 0;
-    let touchStartTime = 0;
+    // 上一个
+    prevBtn.addEventListener('click', () => {
+        if (slider.scrollLeft <= 0) return;
+        const target = Math.max(0, slider.scrollLeft - slideWidth);
+        smoothScroll(target);
+    });
     
-    slider.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartTime = Date.now();
-        isDown = true;
-        startX = e.touches[0].clientX - slider.offsetLeft;
-        scrollLeft = slider.scrollLeft;
-    }, { passive: true });
-
-    slider.addEventListener('touchmove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.touches[0].clientX - slider.offsetLeft;
-        const walk = (x - startX) * 1.5;
-        slider.scrollLeft = scrollLeft - walk;
-    }, { passive: false });
-
-    slider.addEventListener('touchend', (e) => {
-        isDown = false;
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndTime = Date.now();
-        
-        const swipeDistance = touchStartX - touchEndX;
-        const swipeTime = touchEndTime - touchStartTime;
-        
-        // 计算滑动速度和方向
-        const velocity = Math.abs(swipeDistance) / swipeTime;
-        
-        if (Math.abs(swipeDistance) > 50 && velocity > 0.2) {
-            const direction = Math.sign(swipeDistance);
-            handleScroll(direction);
-        } else {
-            // 如果滑动不够快或距离不够，回弹到最近的卡片
-            const currentPosition = slider.scrollLeft;
-            const nearestSlide = Math.round(currentPosition / slideWidth) * slideWidth;
-            smoothScroll(nearestSlide);
-        }
-    }, { passive: true });
+    // 下一个
+    nextBtn.addEventListener('click', () => {
+        if (slider.scrollLeft >= maxScroll) return;
+        const target = Math.min(maxScroll, slider.scrollLeft + slideWidth);
+        smoothScroll(target);
+    });
+    
+    // 监听滚动事件来更新按钮状态
+    slider.addEventListener('scroll', updateButtons);
+    
+    // 初始化按钮状态
+    updateButtons();
+    
+    // 处理窗口大小改变
+    window.addEventListener('resize', () => {
+        updateButtons();
+    });
 };
 
 // 初始化所有功能

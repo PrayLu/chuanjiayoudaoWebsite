@@ -172,7 +172,7 @@ input:focus, textarea:focus {
   transform: translateY(0);
 }
 
-/* 导航栏滚动效果 */
+/* 导航栏过渡效果 */
 .navbar {
   position: fixed;
   top: 0;
@@ -185,6 +185,45 @@ input:focus, textarea:focus {
 
 .navbar-scrolled {
   background: rgba(28, 28, 28, 0.95);
+}
+
+/* 移动端导航栏优化 */
+@media (max-width: 768px) {
+  .navbar {
+    height: auto;
+    padding: 0.8rem 0.5rem;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .navbar ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4列布局 */
+    grid-template-rows: 1fr; /* 单行布局 */
+    gap: 0.5rem;
+    padding: 0.3rem;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* 移除不需要显示的导航项 */
+  .navbar li:nth-child(4) ~ li {
+    display: none;
+  }
+
+  .navbar a {
+    font-size: 0.9rem;
+    white-space: normal;
+    text-align: center;
+    padding: 0.4rem 0.2rem;
+    display: block;
+    line-height: 1.2;
+  }
+
+  .navbar li {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 /* 视频播放器样式 */
@@ -645,6 +684,7 @@ section h2 {
     color: var(--primary-color);
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
+    text-align: center; /* 添加居中对齐 */
 }
 
 .premium-card p {
@@ -878,11 +918,220 @@ section:not(#home):nth-child(even) {
 }
 
 @media (max-width: 768px) {
-    .navbar ul {
-        gap: 1.8rem;
+    .navbar {
+        height: auto;
+        padding: 0.8rem 0.5rem;
+        overflow-x: visible; /* 移除横向滚动 */
     }
-    
+
+    .navbar ul {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4列布局 */
+        grid-template-rows: repeat(2, auto); /* 2行布局 */
+        gap: 0.5rem;
+        padding: 0.3rem;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
     .navbar a {
+        font-size: 0.85rem;
+        white-space: normal; /* 允许文字换行 */
+        text-align: center;
+        padding: 0.4rem 0.2rem;
+        display: block;
+        line-height: 1.2;
+    }
+
+    /* 调整导航项的宽度，确保每个项目大小一致 */
+    .navbar li {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Hero区域优化 */
+    .hero h1 {
+        font-size: 2.2rem;
+        padding: 0 1rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+        padding: 0 1.5rem;
+    }
+
+    /* 服务卡片优化 */
+    .service-cards {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-image {
+        height: 200px;  /* 减小图片高度 */
+    }
+
+    .card h3 {
+        font-size: 1.4rem;
+        padding: 1rem 1rem 0.3rem;
+    }
+
+    .card-description {
+        padding: 0.8rem 1rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* 案例展示优化 */
+    .case-slider {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .video-placeholder {
+        height: 200px;
+    }
+
+    .case-overlay h3 {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+    }
+
+    /* 服务优势优化 */
+    .advantages-grid {
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .advantage-card {
+        padding: 1.5rem;
+    }
+
+    .advantage-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    /* 增值服务优化 */
+    .premium-cards {
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .premium-card {
+        padding: 1.5rem;
+    }
+
+    .premium-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    /* 团队成员展示优化 */
+    .team-slider-container {
+        padding: 0 1rem;
+    }
+
+    .team-member {
+        padding: 1.5rem;
+        min-width: 240px;
+    }
+
+    .member-avatar {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 1rem;
+    }
+
+    .team-member h3 {
+        font-size: 1.3rem;
+    }
+
+    /* 联系表单优化 */
+    #contact form {
+        padding: 1rem;
+    }
+
+    .contact-info {
+        padding: 1rem;
+        gap: 1.5rem;
+    }
+
+    /* 通用section间距优化 */
+    section {
+        padding: 3rem 0;
+    }
+
+    section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Logo优化 */
+    .logo-container {
+        left: 1rem;
+        top: calc(60px + 1rem);
+    }
+
+    .hero-logo {
+        height: 80px;
+    }
+}
+
+/* 更小屏幕的额外优化 */
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero p {
         font-size: 1rem;
+    }
+
+    .card-image {
+        height: 180px;
+    }
+
+    .video-placeholder {
+        height: 180px;
+    }
+
+    .team-member {
+        min-width: 200px;
+    }
+
+    .member-avatar {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* 确保桌面端样式不受影响的保护性代码 */
+@media (min-width: 769px) {
+    .service-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .case-slider {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .navbar {
+        height: 80px;
+    }
+
+    .navbar ul {
+        display: flex;
+        gap: 3.5rem;
+    }
+
+    .navbar a {
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
     }
 }
